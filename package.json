@@ -26,5 +26,8 @@
     "mongoose": "^5.3.13",
     "mongoose-type-email": "^1.0.10",
     "pug": "^2.0.3"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0"
   }
 }
