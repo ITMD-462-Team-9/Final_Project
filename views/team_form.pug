@@ -15,9 +15,7 @@ block content
         label(for='maxTeamSize') Maximum Team Size
         input#maxTeamSize.form-control(type='text', placeholder='Enter Maximum Number of Members',
         name="maxTeamSize", value = team.maxTeamSize)
-
-    p Team Members
-    include user_table.pug
     button.btn.btn-primary(type='submit') Save
-    if !team.isFull
-      a.btn.btn-primary(onclick='confirm("Future Transfer to Add Member Screen (need to carry teamid)")') Add Member
+
+  p Team Members
+  include user_table.pug
