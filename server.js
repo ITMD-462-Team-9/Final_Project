@@ -50,6 +50,7 @@ var userSchema = new mongoose.Schema({
 });
 let User = mongoose.model('User', userSchema);
 
+//variable holds the current logged in user
 let currentUser = undefined;
 
 var db = mongoose.connection;
@@ -57,10 +58,13 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function() {
   //done
   app.get('/', (req,res)=>{
-    //This is the path for the login page
-    res.render('login');
+    //This is the path for the splash
+	res.render('index');
   });
-
+  app.get('/login', (req,res)=>{
+    //This is the path for the splash
+	res.render('login');
+  });  
   //done
   app.post('/', (req,res)=>{
     //this is the post from the login page. must check if username exists in the database, if not redirect to new user, if so redirect to current user info.
@@ -593,11 +597,7 @@ db.once('open', function() {
     });
 
   });
-
-
-  app.post('/skillSort',(req,res)=>{
-    //allows a user to join a team and removes them from the available members list
-  });
+  
 });
 
 app.listen(port, () => console.log(`Team Project Builder app listening on port ${port}!`))
