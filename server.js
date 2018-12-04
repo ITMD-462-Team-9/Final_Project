@@ -64,7 +64,7 @@ db.once('open', function() {
   app.get('/login', (req,res)=>{
     //This is the path for the splash
 	res.render('login');
-  });  
+  });
   //done
   app.post('/', (req,res)=>{
     //this is the post from the login page. must check if username exists in the database, if not redirect to new user, if so redirect to current user info.
@@ -195,19 +195,26 @@ db.once('open', function() {
     //will delete the current users profile and then send them back
     //to the log in page.
     Team.findById(currentUser.teamId, function(err, team){
-      if(currentUser.id == team.admin){
-        Team.deleteOne({"_id": currentUser.teamId}, function(err, product) {
-        });
-        User.find({"teamId":currentUser.teamId},function(err,teamMembers){
-          teamMembers.forEach(user =>{
-            console.log(user)
-            User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false}, function(err, res){
-            });
+      console.log(team)
+      if(team != null){
+        if(currentUser.id == team.admin){
+          Team.deleteOne({"_id": currentUser.teamId}, function(err, product) {
+            console.log("in team deleteone")
+          });
+          User.find({"teamId":currentUser.teamId},function(err,teamMembers){
+            console.log("in finding users on the team")
+            teamMembers.forEach(user =>{
+              console.log(user)
+              User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false}, function(err, res){
+                console.log("removing user from team and setting flags....")
+              });
+            })
+          });
+        } else {
+          Team.updateOne({"_id":team.id},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
+            console.log("updating the team to refelct loosing user")
           })
-        });
-      } else {
-        Team.updateOne({"_id":team.id},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
-        })
+        }
       }
     });
 
@@ -451,6 +458,7 @@ db.once('open', function() {
     //adds user back to the available members list
     //verifies that current user is admin of team tid
     let id = ObjectID.createFromHexString(req.params.uid);
+    console.log('/teams/edit/removemember/'+id)
     User.updateOne({"_id": id},{teamId: null, lookingForGroup: true, partOfGroup: false}, function(err, localRes) {
       if(err) {
         console.log(err);
@@ -458,7 +466,6 @@ db.once('open', function() {
       } else {
         Team.findById(currentUser.teamId, function(err, team){
           Team.updateOne({"_id":currentUser.teamId},{currentTeamSize:team.currentTeamSize-1, isFull:false}, function(err,result){
-
           })
         });
         res.redirect('/teams');
@@ -512,16 +519,16 @@ db.once('open', function() {
       User.find({"teamId":id},function(err,teamMembers){
         teamMembers.forEach(user =>{
           console.log(user)
-          User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false}, function(err, res){
+          User.updateOne({"_id":user.id},{teamId: null, lookingForGroup:true, partOfGroup:false, lookingForMembers: false}, function(err, res){
+            User.findById(currentUser.id, function(err,result){
+              currentUser = result;
+            })
           });
         })
       });
 
       Team.deleteOne({"_id": id}, function(err, product) {
         console.log("hit the delete one");
-        User.findById(currentUser.id, function(err,result){
-          currentUser = result;
-        })
         res.redirect("/Teams");
       });
   });
@@ -597,7 +604,7 @@ db.once('open', function() {
     });
 
   });
-  
+
 });
 
 app.listen(port, () => console.log(`Team Project Builder app listening on port ${port}!`))
